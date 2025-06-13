@@ -1,51 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="signup.css">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="signup.css"/>
+  <title>SkyPort - Sign Up</title>
 </head>
 <body>
-    <div>
-        <style>
-            button {
-                background-color: #003366;
-                color: white;
-                border: none;
-                border-radius: 12px;
-                padding: 20px 40px;
-                font-size: x-large;
-                cursor: pointer;
-                transition: transform 0.2s, box-shadow 0.2s;
-            }
+  <header>
+    <div class="navbar">
+      <div class="logo">SkyPort AMS</div>
+      <div class="nav-items">
+        <nav>
+  <a href="#">Home</a>
+  <a href="#about">About</a>
+  <a href="#contact">Contact</a>
+</nav>
 
-            button:hover {
-                transform: scale(1.1);
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            }
-
-            button:active {
-                transform: scale(1.05);
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            }
-        </style>
-        <script>
-            function redirectToAdminSignup() {
-                window.location.href = "signup_admin.html";
-            }
-
-            function redirectToUserSignup() {
-                window.location.href = "signup_user.html";
-            }
-        </script>
-        <button onclick="redirectToAdminSignup()" style="padding: 50px;font-size: x-large; margin-right: 10px;" href="signup_admin.html">
-            Sign-Up As Admin
-        </button>
-        <button onclick="redirectToUserSignup()" style="padding: 50px;font-size: x-large;">
-            Sign-Up As User
-        </button>
-
+        <div class="nav-buttons">
+          <button onclick="location.href='signup_admin.html'">Sign Up as Admin</button>
+          <button onclick="location.href='signup_user.html'">Sign Up as User</button>
+        </div>
+      </div>
     </div>
+  </header>
+
+<section class="hero">
+  <div class="hero-card">
+    <h1>Welcome to <span>SkyPort</span></h1>
+    <p>Where Lahore Takes Off – Smarter, Faster, Better</p>
+  </div>
+</section>
+
+
+  <section class="about-section" id="about">
+    <h2>About SkyPort</h2>
+    <p>
+      SkyPort is a modern Airport Management System launched in 2025, dedicated to transforming airport operations from the heart of Lahore Airport.
+It streamlines booking management, flight tracking, passenger and administrative access, and real-time staff coordination.
+Our platform ensures efficiency, security, and smooth experiences at every terminal touchpoint—delivering world-class service to both travelers and operators at Lahore’s key aviation hub.
+    </p>
+  </section>
+  
+<section class="contact-section" id="contact">
+  <h2>Contact Us</h2>
+  <p>
+    Reach out to us anytime for support or inquiries.
+  </p>
+  <p style="font-size: 1.2rem; margin: 20px 0;">
+    📧 <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support@skyportlahore.com" target="_blank" style="color: #005bbb; text-decoration: underline;">
+      support@skyportlahore.com
+    </a>
+  </p>
+  <p style="font-size: 1.2rem;">
+    📞 +92-300-1234567
+  </p>
+</section>
+
+  <footer>
+    &copy; 2025 SkyPort - All rights reserved.
+  </footer>
 </body>
 </html>

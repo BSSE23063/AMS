@@ -27,7 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Verify password using password_verify
             if (password_verify($password, $user['password'])) {
                 // Redirect to homepage if password matches
-                header('Location: homepage_USER.html');
+                session_start();
+                $_SESSION['user_username'] = $user['name'];
+                header('Location: homepage_USER.php');
                 exit();
             } else {
                 // Incorrect password

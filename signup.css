@@ -1,221 +1,44 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+body { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+    margin: 0; 
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: url(https://casago.com/playa-del-carmen/wp-content/uploads/sites/9/2019/09/web-airport-AdobeStock_271782927.jpg) no-repeat center center fixed;
-  background-size: cover;
-  color: white;
+.signup-container { 
+    background-color: #ffffff; 
+    padding: 25px 35px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 350px;
 }
 
-/* HEADER */
-header {
-  background-color: rgba(0, 0, 51, 0.95);
-  padding: 1rem 2rem;
-  position: fixed;
-  width: 100%;
-  top: 0;
-  z-index: 999;
+.signup-container h2 { 
+    margin-bottom: 20px; 
+    text-align: center; 
 }
 
-.navbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+.signup-container input { 
+    width: 100%; 
+    padding: 10px; 
+    margin: 10px 0; 
+    border: 1px solid #ddd; 
+    border-radius: 5px;
 }
 
-.logo {
-  font-size: 1.6rem;
-  font-weight: bold;
-  flex-shrink: 0;
-  color: white;
+.signup-container button { 
+    width: 100%; 
+    padding: 10px; 
+    background-color: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer;
 }
 
-.nav-items {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-}
-
-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.navbar a {
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.navbar a:hover {
-  color: #ffd700;
-}
-
-.nav-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.navbar button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-.navbar button:hover {
-  background-color: #0056b3;
-}
-
-/* HERO SECTION */
-.hero {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 100px;
-  text-align: center;
-}
-
-.hero-card {
-  
-  padding: 60px 50px;
-  border-radius: 20px;
-  max-width: 700px;
-  margin: 0 20px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-  animation: fadeIn 1.5s ease-in-out;
-}
-
-.hero-card h1 {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 20px;
-  color: #ffffff;
-  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-}
-
-.hero-card h1 span {
-  color: #00cfff;
-}
-
-.hero-card p {
-  font-size: 1.4rem;
-  color: #00cfff;
-  font-weight: 500;
-  line-height: 1.6;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
-}
-
-/* Fade-in animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
-/* ABOUT SECTION */
-.about-section {
-  background-color: #f4f8fb;
-  color: #333;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.about-section h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-.about-section p {
-  max-width: 800px;
-  margin: auto;
-  font-size: 1.1rem;
-  line-height: 1.8;
-}
-
-/* FOOTER */
-footer {
-  background-color: #003366;
-  color: white;
-  text-align: center;
-  padding: 20px;
-  font-size: 0.9rem;
-}
-
-/* RESPONSIVE FIX */
-@media (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .nav-items {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-  }
-
-  nav, .nav-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .nav-buttons button {
-    width: 100%;
-  }
-}
-
-/* CONTACT SECTION */
-.contact-section {
-  background-color: #e0f0ff;
-  color: #003366;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.contact-section h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-.contact-section p {
-  font-size: 1.1rem;
-  margin-bottom: 10px;
-}
-
-.contact-details {
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.contact-details a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.contact-details a:hover {
-  text-decoration: underline;
+.signup-container button:hover { 
+    background-color: #0056b3; 
 }

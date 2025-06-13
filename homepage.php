@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db_connect.php';
+require 'weather.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -9,6 +10,12 @@ if (!isset($_SESSION['admin_id'])) {
 
 // Fetch flights from database
 $flights = $conn->query("SELECT * FROM flights ORDER BY departure ASC");
+
+// Get weather data for Lahore
+$weatherData = getWeather('Lahore');
+$temperature = isset($weatherData['main']['temp']) ? round($weatherData['main']['temp']) : 'N/A';
+$weatherDesc = isset($weatherData['weather'][0]['main']) ? $weatherData['weather'][0]['main'] : 'N/A';
+$weatherIcon = isset($weatherData['weather'][0]['icon']) ? $weatherData['weather'][0]['icon'] : '01d';
 ?>
 
 <!DOCTYPE html>
@@ -187,17 +194,16 @@ $flights = $conn->query("SELECT * FROM flights ORDER BY departure ASC");
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="weather-widget d-flex justify-content-between align-items-center">
+            <div class="col-md-4">                <div class="weather-widget d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="mb-0">24°C</h5>
-                        <small>Smoke</small>
+                        <h5 class="mb-0"><?php echo $temperature; ?>°C</h5>
+                        <small><?php echo htmlspecialchars($weatherDesc); ?></small>
                     </div>
                     <div class="text-end">
                         <h5 class="mb-0"><?php echo date('g:i A'); ?></h5>
                         <small><?php echo date('m/d/Y'); ?></small>
                     </div>
-                    <i class="fas fa-smog fa-2x"></i>
+                    <img src="https://openweathermap.org/img/wn/<?php echo $weatherIcon; ?>@2x.png" alt="Weather Icon" style="width: 50px; height: 50px;">
                 </div>
             </div>
         </div>
@@ -207,7 +213,7 @@ $flights = $conn->query("SELECT * FROM flights ORDER BY departure ASC");
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
                                 <th>Flight No.</th>
                                 <th>Airline</th>
@@ -220,64 +226,30 @@ $flights = $conn->query("SELECT * FROM flights ORDER BY departure ASC");
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if ($flights->num_rows > 0): ?>
-                                <?php while($row = $flights->fetch_assoc()): 
-                                    $statusClass = strtolower(str_replace(' ', '', $row['status']));
-                                    $routeParts = explode('→', $row['route']);
-                                ?>
+                            <?php while($flight = $flights->fetch_assoc()): ?>
                                 <tr class="flight-row">
-                                    <td class="fw-bold"><?php echo htmlspecialchars($row['flight_no']); ?></td>
+                                    <td><?php echo htmlspecialchars($flight['flight_no']); ?></td>
                                     <td>
-                                        <!-- <img src="airline-logos/<?php echo strtolower($row['airline']); ?>.png" 
-                                             alt="<?php echo htmlspecialchars($row['airline']); ?>" 
-                                             class="airline-logo" 
-                                             onerror="this.src='airline-logos/default.png'"> -->
-                                        <?php echo htmlspecialchars($row['airline']); ?>
+                                        <?php echo htmlspecialchars($flight['airline']); ?>
                                     </td>
+                                    <td><?php echo htmlspecialchars($flight['route']); ?></td>
+                                    <td><?php echo date('M j, Y g:i A', strtotime($flight['departure'])); ?></td>
+                                    <td><?php echo date('M j, Y g:i A', strtotime($flight['arrival'])); ?></td>
+                                    <td>Gate <?php echo htmlspecialchars($flight['gate']); ?></td>
                                     <td>
-                                        <span class="badge bg-light text-dark me-1">
-                                            <?php echo htmlspecialchars(trim($routeParts[0])); ?>
+                                        <span class="status-badge status-<?php echo strtolower($flight['status']); ?>">
+                                            <?php echo htmlspecialchars($flight['status']); ?>
                                         </span>
-                                        <i class="fas fa-arrow-right text-muted mx-1"></i>
-                                        <span class="badge bg-light text-dark">
-                                            <?php echo htmlspecialchars(trim($routeParts[1] ?? '')); ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold"><?php echo date('M j, Y', strtotime($row['departure'])); ?></div>
-                                        <small class="text-muted"><?php echo date('g:i A', strtotime($row['departure'])); ?></small>
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold"><?php echo date('M j, Y', strtotime($row['arrival'])); ?></div>
-                                        <small class="text-muted"><?php echo date('g:i A', strtotime($row['arrival'])); ?></small>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-secondary">Gate <?php echo htmlspecialchars($row['gate']); ?></span>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge status-<?php echo $statusClass; ?>">
-                                            <?php echo htmlspecialchars($row['status']); ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="action-btn edit" title="Edit">
-                                            <i class="fas fa-pencil-alt"></i>
-                                        </button>
-                                        <button class="action-btn delete" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
+                                    </td>                                <td>
+                                    <button class="action-btn edit" onclick="editFlight('<?php echo htmlspecialchars($flight['flight_no']); ?>')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete" onclick="deleteFlight('<?php echo htmlspecialchars($flight['flight_no']); ?>')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
                                 </tr>
-                                <?php endwhile; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="8" class="text-center py-4">
-                                        <i class="fas fa-plane-slash fa-2x text-muted mb-3"></i>
-                                        <h5>No flights scheduled</h5>
-                                        <p class="text-muted">Add your first flight using the button above</p>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
+                            <?php endwhile; ?>
                         </tbody>
                     </table>
                 </div>
@@ -338,7 +310,62 @@ $flights = $conn->query("SELECT * FROM flights ORDER BY departure ASC");
         </div>
     </div>
 
+    <!-- Edit Flight Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h4 class="mb-4"><i class="fas fa-edit me-2 text-primary"></i>Edit Flight</h4>
+            <form id="editFlightForm">
+                <input type="hidden" id="edit_flight_id" name="flight_id">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Flight Number</label>
+                        <input type="text" class="form-control" id="edit_flight_no" name="flight_no" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Airline</label>
+                        <input type="text" class="form-control" id="edit_airline" name="airline" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>Route</label>
+                    <input type="text" class="form-control" id="edit_route" name="route" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Departure</label>
+                        <input type="datetime-local" class="form-control" id="edit_departure" name="departure" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Arrival</label>
+                        <input type="datetime-local" class="form-control" id="edit_arrival" name="arrival" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Gate</label>
+                        <input type="text" class="form-control" id="edit_gate" name="gate" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Status</label>
+                        <select class="form-control" id="edit_status" name="status" required>
+                            <option value="SCHEDULED">Scheduled</option>
+                            <option value="ON TIME">On Time</option>
+                            <option value="DELAYED">Delayed</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="text-end mt-4">
+                    <button type="button" class="btn btn-secondary me-2" id="cancelEditModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         // Modal functionality
         const modal = document.getElementById("flightModal");
@@ -391,9 +418,86 @@ $flights = $conn->query("SELECT * FROM flights ORDER BY departure ASC");
                 }
             });
         });
+
+    // Edit Flight
+    const editModal = document.getElementById("editModal");
+    const editCloseBtn = editModal.querySelector(".close");
+    const cancelEditBtn = document.getElementById("cancelEditModal");
+
+    function editFlight(flightNo) {
+        // Fetch flight details
+        fetch(`edit.php?id=${encodeURIComponent(flightNo)}`)
+            .then(response => response.json())
+            .then(flight => {
+                document.getElementById('edit_flight_id').value = flight.flight_no; // Store original flight number
+                document.getElementById('edit_flight_no').value = flight.flight_no;
+                document.getElementById('edit_airline').value = flight.airline;
+                document.getElementById('edit_route').value = flight.route;
+                document.getElementById('edit_departure').value = flight.departure.replace(' ', 'T');
+                document.getElementById('edit_arrival').value = flight.arrival.replace(' ', 'T');
+                document.getElementById('edit_gate').value = flight.gate;
+                document.getElementById('edit_status').value = flight.status;
+                editModal.style.display = "block";
+            });
+        }
+
+        // Close edit modal
+        editCloseBtn.onclick = function() {
+            editModal.style.display = "none";
+        }
+
+        cancelEditBtn.onclick = function() {
+            editModal.style.display = "none";
+        }
+
+        // Handle edit form submission
+        document.getElementById('editFlightForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch('edit.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    editModal.style.display = "none";
+                    location.reload();
+                } else {
+                    alert('Error updating flight: ' + data.error);
+                }
+            });
+        });
+
+    // Delete Flight
+    function deleteFlight(flightNo) {
+        if (confirm('Are you sure you want to delete this flight?')) {
+            const formData = new FormData();
+            formData.append('flight_id', flightNo);
+                
+                fetch('delete.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error deleting flight: ' + data.error);
+                    }
+                });
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target == editModal) {
+                editModal.style.display = "none";
+            }
+        }
     </script>
 </body>
 </html>
-<?php
-$conn->close();
-?>
+<?php $conn->close(); ?>

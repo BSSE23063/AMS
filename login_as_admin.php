@@ -21,10 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($result->num_rows > 0) {
         $admin = $result->fetch_assoc();
-        
-        if (password_verify($password, $admin['password'])) {
+          if (password_verify($password, $admin['password'])) {
             $_SESSION['admin_id'] = $admin['id'];
             $_SESSION['admin_username'] = $admin['name'];
+            
+            // Archive completed flights
+            require_once 'archive_flights.php';
+            archiveCompletedFlights($conn);
+            archiveCompletedFlights($conn);
+            
             header('Location: homepage.php');
             exit();
         } else {

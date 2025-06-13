@@ -2,20 +2,28 @@
 session_start();
 require 'db_connect.php';
 require 'weather.php';
+require 'archive_flights.php';
+
+// Set timezone to Pakistan timezone
+date_default_timezone_set('Asia/Karachi');
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
     exit();
 }
 
+// Check and archive completed flights
+archiveCompletedFlights($conn);
+
 // Fetch flights from database
 $flights = $conn->query("SELECT * FROM flights ORDER BY departure ASC");
 
 // Get weather data for Lahore
 $weatherData = getWeather('Lahore');
-$temperature = isset($weatherData['main']['temp']) ? round($weatherData['main']['temp']) : 'N/A';
-$weatherDesc = isset($weatherData['weather'][0]['main']) ? $weatherData['weather'][0]['main'] : 'N/A';
-$weatherIcon = isset($weatherData['weather'][0]['icon']) ? $weatherData['weather'][0]['icon'] : '01d';
+$temperature = isset($weatherData['current']['temp_c']) ? round($weatherData['current']['temp_c']) : 'N/A';
+$weatherDesc = isset($weatherData['current']['condition']['text']) ? $weatherData['current']['condition']['text'] : 'N/A';
+$weatherIcon = isset($weatherData['current']['condition']['icon']) ? $weatherData['current']['condition']['icon'] : '//cdn.weatherapi.com/weather/64x64/day/113.png';
+$currentTime = date('h:i A'); // Current time in 12-hour format
 ?>
 
 <!DOCTYPE html>
@@ -176,34 +184,45 @@ $weatherIcon = isset($weatherData['weather'][0]['icon']) ? $weatherData['weather
                     <h2><i class="fas fa-plane-departure me-2 text-primary"></i> Flight Management</h2>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <button class="btn btn-primary" id="addFlightBtn">
-                        <i class="fas fa-plus me-2"></i> Add Flight
-                    </button>
+                    <div class="d-flex gap-2">
+                        <a href="view_archives.php" class="btn btn-secondary">
+                            <i class="fas fa-archive me-2"></i>View Archives
+                        </a>                        <button class="btn btn-primary" id="addFlightBtn">
+                            <i class="fas fa-plus me-2"></i> Add Flight
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Search and Weather Widget -->
         <div class="row mb-4">
-            <div class="col-md-8">
-                <div class="search-container">
-                    <div class="input-group">
+            <div class="col-md-8">                <div class="search-container">
+                    <div class="input-group mb-3">
                         <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Search flights...">
-                        <button class="btn btn-outline-secondary" type="button">Search</button>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by Flight No, Airline, Route...">
+                        <select class="form-select" id="searchAirline" style="max-width: 150px;">
+                            <option value="">All Airlines</option>
+                            <option value="PIA">PIA</option>
+                            <option value="Skyport">Skyport</option>
+                            <option value="AirBlue">AirBlue</option>
+                        </select>
+                        <button class="btn btn-outline-primary" type="button" id="searchBtn">Search</button>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">                <div class="weather-widget d-flex justify-content-between align-items-center">
+            </div>            <div class="col-md-4">
+                <div class="weather-widget d-flex justify-content-between align-items-center">
                     <div>
+                        <h5 class="mb-0" id="currentTime"><?php echo $currentTime; ?></h5>
+                        <small><?php echo date('M d, Y'); ?></small>
+                    </div>
+                    <div class="text-center">
                         <h5 class="mb-0"><?php echo $temperature; ?>°C</h5>
                         <small><?php echo htmlspecialchars($weatherDesc); ?></small>
                     </div>
-                    <div class="text-end">
-                        <h5 class="mb-0"><?php echo date('g:i A'); ?></h5>
-                        <small><?php echo date('m/d/Y'); ?></small>
+                    <div>
+                        <img src="<?php echo $weatherIcon; ?>" alt="Weather Icon" style="width: 64px; height: 64px;">
                     </div>
-                    <img src="https://openweathermap.org/img/wn/<?php echo $weatherIcon; ?>@2x.png" alt="Weather Icon" style="width: 50px; height: 50px;">
                 </div>
             </div>
         </div>
@@ -267,10 +286,14 @@ $weatherIcon = isset($weatherData['weather'][0]['icon']) ? $weatherData['weather
                     <div class="col-md-6">
                         <label for="flight_no" class="form-label">Flight Number</label>
                         <input type="text" class="form-control" id="flight_no" name="flight_no" required>
-                    </div>
-                    <div class="col-md-6">
+                    </div>                    <div class="col-md-6">
                         <label for="airline" class="form-label">Airline</label>
-                        <input type="text" class="form-control" id="airline" name="airline" required>
+                        <select class="form-select" id="airline" name="airline" required>
+                            <option value="">Select Airline</option>
+                            <option value="PIA">PIA</option>
+                            <option value="Skyport">Skyport</option>
+                            <option value="AirBlue">AirBlue</option>
+                        </select>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -322,9 +345,13 @@ $weatherIcon = isset($weatherData['weather'][0]['icon']) ? $weatherData['weather
                         <label>Flight Number</label>
                         <input type="text" class="form-control" id="edit_flight_no" name="flight_no" required>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label>Airline</label>
-                        <input type="text" class="form-control" id="edit_airline" name="airline" required>
+                    <div class="col-md-6 mb-3">                        <label>Airline</label>
+                        <select class="form-select" id="edit_airline" name="airline" required>
+                            <option value="">Select Airline</option>
+                            <option value="PIA">PIA</option>
+                            <option value="Skyport">Skyport</option>
+                            <option value="AirBlue">AirBlue</option>
+                        </select>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -402,15 +429,16 @@ $weatherIcon = isset($weatherData['weather'][0]['icon']) ? $weatherData['weather
             if (event.target == modal) {
                 modal.style.display = "none";
             }
-        }
-
-        // Basic search functionality
-        document.querySelector('.search-container button').addEventListener('click', function() {
-            const searchTerm = document.querySelector('.search-container input').value.toLowerCase();
+        }        // Enhanced search functionality
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedAirline = document.getElementById('searchAirline').value;
             const rows = document.querySelectorAll('.flight-row');
             
             rows.forEach(row => {
                 const rowText = row.textContent.toLowerCase();
+                const airlineMatch = selectedAirline === '' || row.querySelector('td:nth-child(2)').textContent.trim() === selectedAirline;
+                const textMatch = searchTerm === '' || rowText.includes(searchTerm);
                 if (rowText.includes(searchTerm)) {
                     row.style.display = '';
                 } else {
